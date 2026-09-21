@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "laya-snake-cuda"
+version = "0.1.0"
+description = "A live Snake decision demo powered by Laya on CUDA."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "fastapi>=0.117",
+    "huggingface-hub>=0.35",
+    "laya==0.3.4",
+    "rich>=14.0",
+    "torch>=2.9",
+    "uvicorn[standard]>=0.36",
+]
+
+[project.optional-dependencies]
+dev = [
+    "playwright>=1.55",
+    "pytest>=8.4",
+    "ruff>=0.13",
+]
+
+[project.scripts]
+laya-snake = "laya_snake.cli:main"
+laya-snake-web = "laya_snake.web:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/laya_snake"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu130" }

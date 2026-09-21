@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07100c" />
+    <title>Laya Snake // Local Decision Lab</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+  </head>
+  <body>
+    <div class="ambient-grid" aria-hidden="true"></div>
+    <main class="shell">
+      <header class="masthead">
+        <div class="brand-lockup">
+          <div class="brand-mark"><span></span><span></span><span></span></div>
+          <div>
+            <p class="eyebrow">LOCAL DECISION LAB / 01</p>
+            <h1>LAYA<span>—SNAKE</span></h1>
+          </div>
+        </div>
+        <div class="system-strip">
+          <div class="system-cell"><span>MODEL</span><strong>MMBERT · 322M</strong></div>
+          <div class="system-cell"><span>DEVICE</span><strong id="device">CUDA</strong></div>
+          <div class="live-chip" id="live-chip"><i></i><span id="live-label">CONNECTING</span></div>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <article class="arena panel-cut">
+          <div class="panel-head">
+            <div>
+              <span class="section-index">A—01</span>
+              <h2>Environment</h2>
+            </div>
+            <div class="round-meta">
+              <span>SEED</span><strong id="seed">007</strong>
+              <span>STEP</span><strong id="steps">0000</strong>
+            </div>
+          </div>
+          <div class="board-wrap">
+            <canvas id="board" aria-label="Live Snake game board"></canvas>
+            <div class="board-overlay visible" id="board-overlay">
+              <div class="loader-ring"></div>
+              <strong id="overlay-title">LOADING LOCAL MODEL</strong>
+              <span id="overlay-copy">Preparing CUDA decision engine…</span>
+            </div>
+            <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+            <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+          </div>
+          <div class="score-rail">
+            <div class="primary-score"><span>SCORE</span><strong id="score">00</strong></div>
+            <div class="rail-stat"><span>LENGTH</span><strong id="length">06</strong></div>
+            <div class="rail-stat"><span>SHIELD CUTS</span><strong id="interventions">00</strong></div>
+            <div class="rail-note"><i></i> EACH MOVE CALLS LAYA</div>
+          </div>
+        </article>
+
+        <aside class="telemetry panel-cut">
+          <div class="panel-head compact">
+            <div>
+              <span class="section-index">B—02</span>
+              <h2>Decision signal</h2>
+            </div>
+            <div class="thinking-tag" id="thinking-tag">IDLE</div>
+          </div>
+
+          <div class="direction-stack" id="direction-stack">
+            <div class="direction-row" data-direction="UP">
+              <span class="arrow">↑</span><span class="dir-name">UP</span>
+              <div class="prob-track"><div class="prob-fill"></div></div>
+              <strong class="prob-value">—</strong><em class="safe-tag">WAIT</em>
+            </div>
+            <div class="direction-row" data-direction="DOWN">
+              <span class="arrow">↓</span><span class="dir-name">DOWN</span>
+              <div class="prob-track"><div class="prob-fill"></div></div>
+              <strong class="prob-value">—</strong><em class="safe-tag">WAIT</em>
+            </div>
+            <div class="direction-row" data-direction="LEFT">
+              <span class="arrow">←</span><span class="dir-name">LEFT</span>
+              <div class="prob-track"><div class="prob-fill"></div></div>
+              <strong class="prob-value">—</strong><em class="safe-tag">WAIT</em>
+            </div>
+            <div class="direction-row" data-direction="RIGHT">
+              <span class="arrow">→</span><span class="dir-name">RIGHT</span>
+              <div class="prob-track"><div class="prob-fill"></div></div>
+              <strong class="prob-value">—</strong><em class="safe-tag">WAIT</em>
+            </div>
+          </div>
+
+          <div class="choice-band">
+            <div><span>RAW PROPOSAL</span><strong id="raw-action">—</strong></div>
+            <div class="choice-arrow">→</div>
+            <div><span>EXECUTED</span><strong id="executed-action">—</strong></div>
+            <b id="shield-flag">DIRECT</b>
+          </div>
+
+          <div class="metric-grid">
+            <div class="metric"><span>DEAD-END RISK</span><strong id="risk">—</strong></div>
+            <div class="metric"><span>FOOD REACHABLE</span><strong id="reachable">—</strong></div>
+            <div class="metric"><span>INFERENCE</span><strong id="latency">—</strong></div>
+            <div class="metric"><span>MODEL RATE</span><strong id="rate">—</strong></div>
+          </div>
+
+          <div class="latency-chart">
+            <div class="chart-head"><span>INFERENCE TRACE</span><small>LAST 60</small></div>
+            <canvas id="latency-canvas"></canvas>
+          </div>
+
+          <div class="controls">
+            <button class="control-primary" id="pause-button"><span>Ⅱ</span> PAUSE</button>
+            <button class="control-ghost" id="new-button"><span>↻</span> NEW ROUND</button>
+            <label class="speed-control">
+              <span>SPEED <b id="speed-value">8</b>/S</span>
+              <input id="speed-slider" type="range" min="1" max="30" value="8" />
+            </label>
+            <label class="switch-control">
+              <span><b>SAFETY SHIELD</b><small>Cycle-order guard</small></span>
+              <input id="shield-toggle" type="checkbox" checked />
+              <i></i>
+            </label>
+          </div>
+        </aside>
+      </section>
+
+      <footer>
+        <span>LOCALHOST / WEBSOCKET</span>
+        <span class="footer-center">NO CLOUD · NO OUTPUT TOKENS · NO TRAINING</span>
+        <span id="connection-note">LINKING…</span>
+      </footer>
+    </main>
+    <script src="/assets/app.js"></script>
+  </body>
+</html>
