@@ -3,6 +3,8 @@
 A local, real-time Snake decision demo powered by the upstream Laya typed-decision model on
 NVIDIA CUDA. Every move performs a fresh model inference. No Snake training or cloud API is used.
 
+![Laya Snake monochrome web dashboard](docs/assets/laya-snake-dashboard.png)
+
 The deterministic planner supplies compact spatial features. Laya returns probabilities for all
 four directions plus two model estimates. By default, a Hamiltonian-cycle safety shield prevents
 an unsafe proposal from being executed; `--unassisted` exposes the raw policy.
