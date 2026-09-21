@@ -32,9 +32,9 @@ function drawBoard(timestamp = 0) {
   const cellW = rect.width / game.width;
   const cellH = rect.height / game.height;
 
-  boardCtx.fillStyle = "#050b08";
+  boardCtx.fillStyle = "#030303";
   boardCtx.fillRect(0, 0, rect.width, rect.height);
-  boardCtx.strokeStyle = "rgba(139,255,103,0.055)";
+  boardCtx.strokeStyle = "rgba(255,255,255,0.055)";
   boardCtx.lineWidth = 1;
   for (let x = 1; x < game.width; x++) {
     boardCtx.beginPath(); boardCtx.moveTo(x * cellW, 0); boardCtx.lineTo(x * cellW, rect.height); boardCtx.stroke();
@@ -48,10 +48,11 @@ function drawBoard(timestamp = 0) {
   const fx = (foodX + 0.5) * cellW;
   const fy = (foodY + 0.5) * cellH;
   boardCtx.save();
-  boardCtx.shadowColor = "#ff674d"; boardCtx.shadowBlur = 18 * pulse;
-  boardCtx.fillStyle = "#ff674d";
-  boardCtx.beginPath(); boardCtx.arc(fx, fy, Math.min(cellW, cellH) * 0.22, 0, Math.PI * 2); boardCtx.fill();
-  boardCtx.strokeStyle = `rgba(255,103,77,${pulse})`; boardCtx.lineWidth = 1;
+  boardCtx.shadowColor = "#ffffff"; boardCtx.shadowBlur = 16 * pulse;
+  boardCtx.fillStyle = "#030303";
+  boardCtx.strokeStyle = "#ffffff"; boardCtx.lineWidth = 2;
+  boardCtx.beginPath(); boardCtx.arc(fx, fy, Math.min(cellW, cellH) * 0.22, 0, Math.PI * 2); boardCtx.fill(); boardCtx.stroke();
+  boardCtx.strokeStyle = `rgba(255,255,255,${pulse})`; boardCtx.lineWidth = 1;
   boardCtx.beginPath(); boardCtx.arc(fx, fy, Math.min(cellW, cellH) * (0.31 + pulse * 0.08), 0, Math.PI * 2); boardCtx.stroke();
   boardCtx.restore();
 
@@ -59,8 +60,8 @@ function drawBoard(timestamp = 0) {
     const index = game.snake.length - 1 - reverseIndex;
     const inset = Math.max(1.5, Math.min(cellW, cellH) * 0.08);
     const alpha = 0.48 + (1 - index / Math.max(1, game.snake.length)) * 0.48;
-    boardCtx.fillStyle = index === 0 ? "#c2ffae" : `rgba(139,255,103,${alpha})`;
-    if (index === 0) { boardCtx.shadowColor = "#8bff67"; boardCtx.shadowBlur = 14; }
+    boardCtx.fillStyle = index === 0 ? "#ffffff" : `rgba(235,235,231,${alpha})`;
+    if (index === 0) { boardCtx.shadowColor = "#ffffff"; boardCtx.shadowBlur = 12; }
     boardCtx.fillRect(x * cellW + inset, y * cellH + inset, cellW - inset * 2, cellH - inset * 2);
     boardCtx.shadowBlur = 0;
   });
@@ -69,7 +70,7 @@ function drawBoard(timestamp = 0) {
 function drawLatency() {
   const rect = fitCanvas(latencyCanvas, latencyCtx);
   latencyCtx.clearRect(0, 0, rect.width, rect.height);
-  latencyCtx.strokeStyle = "rgba(139,255,103,0.12)";
+  latencyCtx.strokeStyle = "rgba(255,255,255,0.12)";
   latencyCtx.beginPath(); latencyCtx.moveTo(0, rect.height - 0.5); latencyCtx.lineTo(rect.width, rect.height - 0.5); latencyCtx.stroke();
   if (latencyHistory.length < 2) return;
   const max = Math.max(50, ...latencyHistory);
@@ -79,9 +80,9 @@ function drawLatency() {
     const y = rect.height - (value / max) * (rect.height - 5) - 2;
     index ? latencyCtx.lineTo(x, y) : latencyCtx.moveTo(x, y);
   });
-  latencyCtx.strokeStyle = "#8bff67";
+  latencyCtx.strokeStyle = "#ffffff";
   latencyCtx.lineWidth = 1.5;
-  latencyCtx.shadowColor = "#8bff67"; latencyCtx.shadowBlur = 7;
+  latencyCtx.shadowColor = "#ffffff"; latencyCtx.shadowBlur = 6;
   latencyCtx.stroke(); latencyCtx.shadowBlur = 0;
 }
 

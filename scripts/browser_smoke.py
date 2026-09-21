@@ -36,10 +36,17 @@ def main() -> None:
         assert page.locator('[data-direction="UP"] .prob-value').text_content() != "—"
         assert page.locator("#device").text_content() == "CUDA"
 
-        page.locator("#pause-button").click()
+        pause_button = page.locator("#pause-button")
+        if "RESUME" in pause_button.text_content():
+            pause_button.click()
+            page.wait_for_function(
+                "document.querySelector('#pause-button').textContent.includes('PAUSE')"
+            )
+        pause_button.click()
         page.wait_for_function(
             "document.querySelector('#pause-button').textContent.includes('RESUME')"
         )
+        page.wait_for_timeout(200)
         paused_step = page.locator("#steps").text_content()
         page.wait_for_timeout(500)
         assert page.locator("#steps").text_content() == paused_step
@@ -48,6 +55,9 @@ def main() -> None:
         shield.uncheck()
         page.wait_for_timeout(100)
         assert not shield.is_checked()
+        shield.check()
+        page.wait_for_timeout(100)
+        assert shield.is_checked()
 
         seed_before = int(page.locator("#seed").text_content())
         page.locator("#new-button").click()
