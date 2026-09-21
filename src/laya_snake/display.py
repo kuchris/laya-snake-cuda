@@ -55,9 +55,10 @@ def _metrics(
     rate: float,
     interventions: int,
     paused: bool,
+    backend: str,
 ) -> Panel:
     content: list = []
-    title = Text("Laya decision", style="bold cyan")
+    title = Text(f"{backend.upper()} decision", style="bold cyan")
     if paused:
         title.append("  PAUSED", style="bold yellow")
     content.append(title)
@@ -125,14 +126,28 @@ def dashboard(
     rate: float,
     interventions: int,
     paused: bool = False,
+    backend: str = "laya",
 ):
     header = Align.center(
-        Text("LAYA SNAKE CUDA  ·  every move is a fresh local model decision", style="bold white")
+        Text(
+            f"{backend.upper()} SNAKE CUDA  ·  every move is a fresh local model decision",
+            style="bold white",
+        )
     )
     columns = Columns(
         [
             _board(game),
-            _metrics(decision, plan, executed, shielded, device, rate, interventions, paused),
+            _metrics(
+                decision,
+                plan,
+                executed,
+                shielded,
+                device,
+                rate,
+                interventions,
+                paused,
+                backend,
+            ),
         ],
         padding=(0, 1),
         expand=True,

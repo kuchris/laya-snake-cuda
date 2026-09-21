@@ -106,6 +106,9 @@ function updateUI(state) {
   latestState = state;
   const game = state.game;
   const decision = state.decision;
+  $("#backend-name").textContent = state.backend.toUpperCase();
+  $("#rail-backend").textContent = state.backend.toUpperCase();
+  $("#model-name").textContent = state.model_label;
   $("#device").textContent = state.device;
   $("#seed").textContent = pad(game.seed, 3);
   $("#steps").textContent = pad(game.steps, 4);

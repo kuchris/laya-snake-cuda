@@ -1,4 +1,4 @@
-"""Local FastAPI/WebSocket dashboard for Laya Snake."""
+"""Local FastAPI/WebSocket dashboard for typed-decision Snake."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .game import SnakeGame
 from .planner import Plan, analyze, shield_action
-from .policy import Decision, LayaPolicy, discover_model
+from .policy import Decision, DecisionPolicy, discover_model, load_policy
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ASSET_DIR = Path(__file__).resolve().parent / "web_assets"
@@ -29,11 +29,18 @@ ASSET_DIR = Path(__file__).resolve().parent / "web_assets"
 class GameService:
     """Own the model and game loop while browsers remain disposable clients."""
 
-    def __init__(self, model_path: Path, device: str = "cuda", seed: int = 7) -> None:
+    def __init__(
+        self,
+        model_path: Path,
+        device: str = "cuda",
+        seed: int = 7,
+        backend: str = "laya",
+    ) -> None:
         self.model_path = model_path
         self.requested_device = device
+        self.backend = backend
         self.game = SnakeGame(seed=seed)
-        self.policy: LayaPolicy | None = None
+        self.policy: DecisionPolicy | None = None
         self.device = device
         self.model_status = "loading"
         self.error: str | None = None
@@ -68,11 +75,11 @@ class GameService:
     async def _run(self) -> None:
         try:
             self.policy = await asyncio.to_thread(
-                LayaPolicy, self.model_path, self.requested_device
+                load_policy, self.backend, self.model_path, self.requested_device
             )
             self.device = self.policy.device
             if self.requested_device == "cuda" and self.device != "cuda":
-                raise RuntimeError(f"CUDA requested, but Laya loaded on {self.device}")
+                raise RuntimeError(f"CUDA requested, but {self.backend} loaded on {self.device}")
             self.model_status = "ready"
             self._bump()
         except (OSError, RuntimeError, ValueError) as exc:
@@ -157,6 +164,8 @@ class GameService:
         return {
             "version": self.version,
             "model_status": self.model_status,
+            "backend": self.backend,
+            "model_label": self.policy.model_label if self.policy else self.backend.upper(),
             "error": self.error,
             "device": self.device.upper(),
             "paused": self.paused,
@@ -204,7 +213,7 @@ def create_app(service: GameService) -> FastAPI:
         yield
         await service.stop()
 
-    app = FastAPI(title="Laya Snake CUDA", lifespan=lifespan)
+    app = FastAPI(title="Typed Decision Snake CUDA", lifespan=lifespan)
     app.mount("/assets", StaticFiles(directory=ASSET_DIR), name="assets")
 
     @app.get("/", include_in_schema=False)
@@ -213,7 +222,11 @@ def create_app(service: GameService) -> FastAPI:
 
     @app.get("/api/health")
     async def health():
-        return {"ok": True, "model_status": service.model_status}
+        return {
+            "ok": True,
+            "model_status": service.model_status,
+            "backend": service.backend,
+        }
 
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket):
@@ -237,8 +250,9 @@ def create_app(service: GameService) -> FastAPI:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run the local Laya Snake web dashboard.")
-    parser.add_argument("--model", type=Path, help="Local Laya checkpoint directory")
+    parser = argparse.ArgumentParser(description="Run the local Snake decision dashboard.")
+    parser.add_argument("--backend", default="laya", choices=("laya", "semif"))
+    parser.add_argument("--model", type=Path, help="Local checkpoint directory for the backend")
     parser.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
@@ -249,8 +263,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
-    model_path = args.model.resolve() if args.model else discover_model(PROJECT_ROOT)
-    service = GameService(model_path, args.device, args.seed)
+    model_path = (
+        args.model.resolve() if args.model else discover_model(PROJECT_ROOT, args.backend)
+    )
+    service = GameService(model_path, args.device, args.seed, args.backend)
     app = create_app(service)
     url = f"http://{args.host}:{args.port}"
     if not args.no_browser:

@@ -1,4 +1,4 @@
-"""Command-line entry point for the live Laya Snake demo."""
+"""Command-line entry point for the local typed-decision Snake demo."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from rich.live import Live
 from .display import dashboard, poll_keys
 from .game import SnakeGame
 from .planner import analyze, shield_action
-from .policy import LayaPolicy, discover_model
+from .policy import discover_model, load_policy
 from .recording import Recorder
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -22,9 +22,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run Snake with a fresh local Laya decision every move."
+        description="Run Snake with a fresh local typed decision every move."
     )
-    parser.add_argument("--model", type=Path, help="Local Laya checkpoint directory")
+    parser.add_argument("--backend", default="laya", choices=("laya", "semif"))
+    parser.add_argument("--model", type=Path, help="Local checkpoint directory for the backend")
     parser.add_argument("--device", default="cuda", choices=("cuda", "cpu"))
     parser.add_argument("--width", type=int, default=24)
     parser.add_argument("--height", type=int, default=16)
@@ -51,14 +52,18 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _run(args: argparse.Namespace, console: Console) -> int:
-    model_path = args.model.resolve() if args.model else discover_model(PROJECT_ROOT)
+    model_path = (
+        args.model.resolve() if args.model else discover_model(PROJECT_ROOT, args.backend)
+    )
     if not model_path.is_dir():
         raise FileNotFoundError(f"model directory does not exist: {model_path}")
 
-    with console.status(f"Loading local Laya checkpoint on {args.device.upper()}…"):
-        policy = LayaPolicy(model_path, device=args.device)
+    with console.status(
+        f"Loading local {args.backend.upper()} checkpoint on {args.device.upper()}…"
+    ):
+        policy = load_policy(args.backend, model_path, device=args.device)
     if args.device == "cuda" and policy.device != "cuda":
-        raise RuntimeError(f"CUDA was requested, but Laya loaded on {policy.device}")
+        raise RuntimeError(f"CUDA was requested, but {args.backend} loaded on {policy.device}")
 
     game = SnakeGame(args.width, args.height, args.initial_length, args.seed)
     target_fps = max(1.0, args.fps)
@@ -125,6 +130,7 @@ def _run(args: argparse.Namespace, console: Console) -> int:
                     rate,
                     interventions,
                     paused,
+                    policy.name,
                 )
                 if live_context:
                     live_context.update(last_view, refresh=True)

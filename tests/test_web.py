@@ -21,6 +21,7 @@ def test_web_controls_update_local_state_without_loading_model() -> None:
     assert snapshot["target_fps"] == 30.0
     assert snapshot["shield_enabled"] is False
     assert snapshot["paused"] is True
+    assert snapshot["backend"] == "laya"
 
     service.control("new_game")
     snapshot = service.snapshot()

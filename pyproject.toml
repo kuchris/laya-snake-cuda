@@ -23,13 +23,20 @@ dev = [
     "pytest>=8.4",
     "ruff>=0.13",
 ]
+semif = [
+    "semif-phase1 @ git+https://github.com/TheoLeeCJ/SemIf.git@ca3ba65f142967030ecb453346e94d6f476a69df",
+]
 
 [project.scripts]
 laya-snake = "laya_snake.cli:main"
 laya-snake-web = "laya_snake.web:main"
+laya-snake-benchmark = "laya_snake.benchmark:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/laya_snake"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -45,3 +52,8 @@ explicit = true
 
 [tool.uv.sources]
 torch = { index = "pytorch-cu130" }
+
+[tool.uv]
+override-dependencies = [
+    "torch>=2.10",
+]
